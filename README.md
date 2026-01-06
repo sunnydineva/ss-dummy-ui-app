@@ -1,54 +1,97 @@
-## 🔐 Keycloak – задължителни настройки за `dummy-ui-app` (React SPA)
+# 🖥️ dummy-ui-app (Reference UI)
 
-Този frontend е React SPA (Vite + TypeScript) и използва **Keycloak (OIDC)** чрез `keycloak-js`.
-Клиентът в Keycloak **ЗАДЪЛЖИТЕЛНО** трябва да е конфигуриран като **public SPA client**.
+React + TypeScript (Vite) reference frontend used to demonstrate **Keycloak login flows** and calling protected APIs with a **Bearer token**.
+
+- **Variant A**: auto-redirect to Keycloak (login-required UX)
+- **Variant B**: user clicks Login (no auto-redirect UX)
+
+![img.png](img.png)
+
+🔗 **Backend reference implementation (`ss-user-service`)**:  
+👉 https://github.com/sunnydineva/ss-user-service
 
 ---
 
-### 1️⃣ Client configuration (Capability config)
+## ✅ Prerequisites
 
-**Keycloak Admin Console → Realm → Clients → `dummy-ui-app` → Settings**
+- Keycloak running (realm: `sunnyrealm`)
+- `ss-user-service` running (default: `http://localhost:18081`)
+- Node.js + npm
+
+---
+
+## 🚀 Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+## UI:
+```http
+http://localhost:5173/variant-a
+http://localhost:5173/variant-b
+```
+
+## 🔐 Keycloak – required settings for dummy-ui-app (React SPA)
+
+This frontend is a public SPA client using keycloak-js (OIDC + PKCE).
+The Keycloak client must be configured as a public client (no client secret).
+
+---
+
+### Client configuration (Capability config)
+
+Keycloak Admin Console → Realm → Clients → `dummy-ui-app` → Settings
 
 | Setting | Value |
 |------|------|
-| Client authentication | ❌ **OFF** |
-| Standard flow | ✅ **ON** |
-| Implicit flow | ❌ OFF |
-| Direct access grants | ❌ OFF |
-| Service accounts roles | ❌ OFF |
+| Client authentication | **OFF** |
+| Standard flow |  **ON** |
+| Implicit flow |  OFF |
+| Direct access grants |  OFF |
+| Service accounts roles |  OFF |
 
-> ⚠️ React SPA **НЕ трябва** да използва client secret.  
-> Ако `Client authentication` е **ON**, login и redirect процесът може да не работи коректно.
+> ⚠️ SPAs must not use a client secret.  
+> If `Client authentication` is **ON**, login и redirect might not work correctly.
 
 ---
 
-### 2️⃣ Redirect & CORS configuration (Access settings)
+### Redirect & CORS configuration (Access settings)
 
-Скролни надолу до **Access settings** и попълни:
-
-#### ✅ Valid redirect URIs
+#### Valid redirect URIs
 ```text
 http://localhost:5173/* 
 http://localhost:8088/* 
 ```
 
-#### ✅ Valid post logout redirect URIs
+#### Valid post logout redirect URIs
 ```text
 http://localhost:5173/*
 http://localhost:8088/*
 ```
 
-#### ✅ Web origins
+####  Web origins
 ```text
-http://localhost:5173/*
-http://localhost:8088/*
+http://localhost:5173
+http://localhost:8088
 ```
 
 Redirect whitelist-ът се проверява само срещу:
 👉 Valid redirect URIs
 
-### 4️⃣ Runtime behavior (sanity check)
-| URL                               | Очаквано поведение                |
-| --------------------------------- | --------------------------------- |
-| `http://localhost:5173/variant-a` | Auto redirect към Keycloak login  |
-| `http://localhost:5173/variant-b` | НЯМА auto redirect, login с бутон |
+###  Runtime behavior (sanity check)
+| URL                               | Expected behavior               |
+| --------------------------------- |---------------------------------|
+| `http://localhost:5173/variant-a` | Auto redirect to Keycloak login |
+| `http://localhost:5173/variant-b` | NO auto redirect, login button  |
+
+## ⚙️ Environment variables
+
+Create .env in the project root:
+``` 
+VITE_KEYCLOAK_URL=http://localhost:8083
+VITE_KEYCLOAK_REALM=sunnyrealm
+VITE_KEYCLOAK_CLIENT_ID=ss-user-service
+VITE_USER_SERVICE_BASE_URL=http://localhost:18081
+```
